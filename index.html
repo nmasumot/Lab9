@@ -28,14 +28,14 @@
 <body>
   <fieldset>
     <legend>Error Calculator</legend>
-    <input type="number" name="first-num" id="first-num" />
+    <input type="string" name="first-num" id="first-num" />
     <select name="operator" id="operator">
       <option>+</option>
       <option>-</option>
       <option>*</option>
       <option>/</option>
     </select>
-    <input type="number" name="second-num" id="second-num" />
+    <input type="string" name="second-num" id="second-num" />
     <button id="calculate">Calculate</button>
     <br />
     <output></output>
@@ -55,18 +55,130 @@
     <button>Trigger a Global Error</button>
   </section>
 
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+<script>
+  window.TrackJS && TrackJS.install({ 
+    token: "c55fcb7a949c45d79aba4eb18a92b27b"
+    // for more configuration options, see https://docs.trackjs.com
+  });
+</script>
+
   <script>
-    let calculateBtn = document.querySelector('#calculate');
-    calculateBtn.addEventListener('click', () => {
-      let output = document.querySelector('output');
-      let firstNum = document.querySelector('#first-num').value;
-      let secondNum = document.querySelector('#second-num').value;
-      let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
-    });
+
+      class InputError extends Error{
+        constructor(message) {
+          super(message);
+          this.name = "Input Error";
+        }
+      }
+    
+      let calculateBtn = document.querySelector('#calculate');
+      calculateBtn.addEventListener('click', () => {
+        let output = document.querySelector('output');
+        let firstNum = document.querySelector('#first-num').value;
+        let secondNum = document.querySelector('#second-num').value;
+        let operator = document.querySelector('#operator').value;
+        let firstNumtoInt = Number(firstNum);
+        let secondNumtoInt = Number(secondNum);
+        
+        try{
+          if(Number.isNaN(firstNumtoInt)){
+            throw new InputError("The first input is not a Number");
+          }
+          if(Number.isNaN(secondNumtoInt)){
+            throw new InputError("The second input is not a Number");
+          }
+          output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+        } catch(err){
+          console.log(err);
+          TrackJS.track(err.message);
+        } finally{
+          console.log("Calculate Button Was Clicked!");
+        }
+      });
+    
+    
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
     // TODO - Make buttons functional
+    let consoleLogBtn = errorBtns[0];
+    consoleLogBtn.addEventListener('click', () => {
+      console.log("Console Log Demo");              
+    });
+
+    let consoleErrorBtn = errorBtns[1];
+    consoleErrorBtn.addEventListener('click', () => {
+      console.error("Console Error Demo");
+    });
+
+    let consoleDirBtn = errorBtns[2];
+    consoleDirBtn.addEventListener('click', () => {
+      console.dir(consoleDirBtn);
+    });
+
+    let consoleDirXMLBtn = errorBtns[3];
+    consoleDirXMLBtn.addEventListener('click', () => {
+      console.dirxml(document);
+    });
+
+    let consoleGroupStartBtn = errorBtns[4];
+    consoleGroupStartBtn.addEventListener('click', () => {
+      console.group("Console Group Start");
+    });
+
+    let consoleGroupEndBtn = errorBtns[5];
+    consoleGroupEndBtn.addEventListener('click', () => {
+      console.groupEnd("Console Group Start");
+    });
+
+    let consoleTableBtn = errorBtns[6];
+    consoleTableBtn.addEventListener('click', () => {
+      console.table([
+        {
+          name: "Software Engineering",
+          num: 110,
+        },
+        {
+          name: "Programming Languages",
+          num: 130,
+        },
+        {
+          name: "Advanced Software Engineering",
+          num: 112,
+        }
+      ]);
+    });
+
+    let consoleTimeStartBtn = errorBtns[7];
+    consoleTimeStartBtn.addEventListener('click', () => {
+      console.log("Timer Started!");
+      console.time("Run Time");
+    });
+
+    let consoleTimeEndBtn = errorBtns[8];
+    consoleTimeEndBtn.addEventListener('click', () => {
+      console.log("Timer Ended!");
+      console.timeEnd("Run Time");
+    });
+
+    let consoleTraceBtn = errorBtns[9];
+    consoleTraceBtn.addEventListener('click', () => {
+      const deep = () => { deeper(); };
+      const deeper = () => { deepest(); };
+      const deepest = () => { console.trace("traceTest") };
+      deep();
+    }); 
+
+    let consoleWinErrorBtn = errorBtns[10];
+    consoleWinErrorBtn.addEventListener('click', () => {
+      let notAnHTMLObject;
+      document.append(notAnHTMLObject);
+    });
+
+    window.onerror = function(){
+      console.log("Global Error");
+    }
+    
   </script>
 </body>
 </html>
